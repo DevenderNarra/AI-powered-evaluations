@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Assignment Evaluator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #818cf8, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 36px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #cbd5e1;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed #475569;
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #818cf8;
+      background: #1a2744;
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-zone .icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    .drop-zone p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .drop-zone p span {
+      color: #818cf8;
+      font-weight: 600;
+    }
+
+    .file-info {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Template download */
+    .template-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #0f172a;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+
+    .template-row p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .btn-link {
+      font-size: 0.85rem;
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .btn-link:hover { text-decoration: underline; }
+
+    /* Preview table */
+    #preview-section { display: none; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    thead tr { background: #0f172a; }
+
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      color: #64748b;
+      font-weight: 600;
+      white-space: nowrap;
+      border-bottom: 1px solid #334155;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e293b;
+      color: #cbd5e1;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover { background: #1a2744; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-pending { background: #1e3a5f; color: #38bdf8; }
+    .badge-done    { background: #14532d; color: #4ade80; }
+    .badge-error   { background: #450a0a; color: #f87171; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+    }
+
+    .btn-outline:hover:not(:disabled) { border-color: #818cf8; color: #818cf8; }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Progress */
+    #progress-section { display: none; }
+
+    .progress-bar-wrap {
+      background: #0f172a;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #818cf8, #38bdf8);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .progress-label {
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    /* Results */
+    #results-section { display: none; }
+
+    .result-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .result-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #f1f5f9;
+    }
+
+    .score-pill {
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .score-high  { background: #14532d; color: #4ade80; }
+    .score-mid   { background: #713f12; color: #fbbf24; }
+    .score-low   { background: #450a0a; color: #f87171; }
+
+    .hire-badge {
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .hire-yes   { background: #14532d; color: #4ade80; }
+    .hire-maybe { background: #713f12; color: #fbbf24; }
+    .hire-no    { background: #450a0a; color: #f87171; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .score-item {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .score-item .label {
+      font-size: 0.72rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .score-item .value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .section-title {
+      font-size: 0.78rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 12px 0 6px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+    }
+
+    .tag-green  { background: #14532d33; color: #4ade80; border: 1px solid #14532d; }
+    .tag-red    { background: #450a0a33; color: #f87171; border: 1px solid #450a0a; }
+    .tag-blue   { background: #1e3a5f33; color: #38bdf8; border: 1px solid #1e3a5f; }
+
+    .reason-box {
+      background: #1e293b;
+      border-left: 3px solid #818cf8;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      color: #94a3b8;
+      margin-top: 10px;
+    }
+
+    /* Export */
+    #export-section { display: none; margin-top: 8px; }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .alert-error { background: #450a0a33; border: 1px solid #7f1d1d; color: #fca5a5; }
+    .alert-info  { background: #1e3a5f33; border: 1px solid #1e40af; color: #93c5fd; }
+  </style>
+</head>
+<body>
+
+  <h1>AI Assignment Evaluator</h1>
+  <p class="subtitle">Upload student submissions via Excel and get AI-powered evaluations instantly.</p>
+
+  <!-- Upload Card -->
+  <div class="card">
+    <h2>Upload Submissions</h2>
+
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="file-input" accept=".xlsx,.xls" />
+      <div class="icon">📊</div>
+      <p><span>Click to upload</span> or drag & drop your Excel file</p>
+      <p style="margin-top:4px;">Supports .xlsx / .xls</p>
+    </div>
+
+    <p class="file-info" id="file-info"></p>
+
+    <div class="template-row">
+      <p>Need the correct column format?</p>
+      <a href="/download-template" class="btn-link">Download Template ↓</a>
+    </div>
+  </div>
+
+  <!-- Preview Card -->
+  <div class="card" id="preview-section">
+    <h2>Preview — <span id="row-count">0</span> students found</h2>
+
+    <div class="table-wrap">
+      <table id="preview-table">
+        <thead id="preview-head"></thead>
+        <tbody id="preview-body"></tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="evaluate-btn" onclick="startEvaluation()">
+        ⚡ Evaluate All
+      </button>
+      <button class="btn btn-outline" onclick="resetAll()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Progress Card -->
+  <div class="card" id="progress-section">
+    <h2>Evaluating...</h2>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <p class="progress-label" id="progress-label">0 / 0 complete</p>
+  </div>
+
+  <!-- Results Card -->
+  <div class="card" id="results-section">
+    <h2>Evaluation Results</h2>
+    <div id="results-container"></div>
+
+    <div id="export-section">
+      <button class="btn btn-primary" onclick="exportCSV()">⬇ Export Results CSV</button>
+    </div>
+  </div>
+
+<script>
+  let parsedRows = [];
+  let results = [];
+
+  // --- Drag & drop styling ---
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  // --- Parse Excel via backend ---
+  function handleFile(file) {
+    document.getElementById('file-info').textContent = `Selected: ${file.name}`;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/parse-excel', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { alert(data.error); return; }
+        parsedRows = data.rows;
+        showPreview(data.columns, data.rows);
+      })
+      .catch(() => alert('Failed to parse file.'));
+  }
+
+  function showPreview(columns, rows) {
+    const head = document.getElementById('preview-head');
+    const body = document.getElementById('preview-body');
+
+    head.innerHTML = '<tr>' + columns.map(c => `<th>${c}</th>`).join('') + '<th>Status</th></tr>';
+    body.innerHTML = rows.map((row, i) =>
+      '<tr id="row-' + i + '">' +
+      columns.map(c => `<td title="${row[c] || ''}">${row[c] || ''}</td>`).join('') +
+      `<td><span class="badge badge-pending" id="status-${i}">Pending</span></td>` +
+      '</tr>'
+    ).join('');
+
+    document.getElementById('row-count').textContent = rows.length;
+    document.getElementById('preview-section').style.display = 'block';
+    document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // --- Evaluate all rows sequentially ---
+  async function startEvaluation() {
+    if (!parsedRows.length) return;
+
+    results = [];
+    document.getElementById('evaluate-btn').disabled = true;
+    document.getElementById('progress-section').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('results-container').innerHTML = '';
+    document.getElementById('export-section').style.display = 'none';
+    document.getElementById('progress-section').scrollIntoView({ behavior: 'smooth' });
+
+    for (let i = 0; i < parsedRows.length; i++) {
+      updateProgress(i, parsedRows.length);
+      document.getElementById(`status-${i}`).textContent = 'Evaluating…';
+      document.getElementById(`status-${i}`).className = 'badge badge-pending';
+
+      try {
+        const result = normalizeResult(await evaluateRow(parsedRows[i]));
+        results.push({ student: parsedRows[i], result });
+        renderResult(parsedRows[i], result, i);
+        document.getElementById(`status-${i}`).textContent = 'Done';
+        document.getElementById(`status-${i}`).className = 'badge badge-done';
+      } catch (err) {
+        const errMsg = String(err);
+        results.push({ student: parsedRows[i], result: null, error: errMsg });
+        document.getElementById(`status-${i}`).textContent = 'Error';
+        document.getElementById(`status-${i}`).className = 'badge badge-error';
+        document.getElementById(`status-${i}`).title = errMsg;
+        renderError(parsedRows[i], errMsg, i);
+      }
+    }
+
+    updateProgress(parsedRows.length, parsedRows.length);
+    document.getElementById('results-section').style.display = 'block';
+    document.getElementById('export-section').style.display = 'block';
+    document.getElementById('evaluate-btn').disabled = false;
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function evaluateRow(row) {
+    return new Promise((resolve, reject) => {
+      const payload = {
+        problem_statement: row['Problem Statement'] || row['problem_statement'] || '',
+        use_cases:         row['Use Cases'] || row['use_cases'] || '',
+        system_design:     row['System Design'] || row['system_design'] || '',
+        github_url:        row['GitHub URL'] || row['github_url'] || '',
+        deployed_url:      row['Deployed URL'] || row['deployed_url'] || '',
+        video_url:         row['Video URL'] || row['video_url'] || '',
+      };
+
+      fetch('/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).then(res => {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        function read() {
+          reader.read().then(({ done, value }) => {
+            if (done) { reject(new Error('Stream ended without result')); return; }
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const json = JSON.parse(line.slice(6));
+              if (json.error) { reject(new Error(json.error)); return; }
+              if (json.done) {
+                try {
+                  let raw = json.full.trim();
+                  // Strip markdown code fences if present
+                  raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+                  resolve(JSON.parse(raw));
+                } catch (e) {
+                  reject(new Error('Invalid JSON response: ' + json.full.slice(0, 200)));
+                }
+                return;
+              }
+            }
+            read();
+          }).catch(reject);
+        }
+        read();
+      }).catch(reject);
+    });
+  }
+
+  function updateProgress(done, total) {
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `${done} / ${total} complete`;
+  }
+
+  // Normalize scores: if model returns 0-100 scale, convert to 0-10
+  function normalizeScore(v) {
+    const n = parseFloat(v);
+    if (isNaN(n)) return null;
+    return n > 10 ? parseFloat((n / 10).toFixed(1)) : n;
+  }
+
+  function normalizeResult(result) {
+    if (!result) return result;
+    result.overall_score = normalizeScore(result.overall_score);
+    if (result.scores) {
+      for (const key of Object.keys(result.scores)) {
+        result.scores[key] = normalizeScore(result.scores[key]);
+      }
+    }
+    return result;
+  }
+
+  // --- Render error ---
+  function renderError(student, errMsg, idx) {
+    const name = student['Student Name'] || student['Name'] || `Student ${idx + 1}`;
+    document.getElementById('results-container').insertAdjacentHTML('beforeend', `
+      <div class="result-card">
+        <div class="result-header">
+          <span class="result-name">${name}</span>
+          <span class="badge badge-error">Failed</span>
+        </div>
+        <div class="alert alert-error">${errMsg}</div>
+      </div>`);
+  }
+
+  // --- Render single result ---
+  function renderResult(student, result, idx) {
+    const name = student['Student Name'] || student['Name'] || `Student ${idx + 1}`;
+    const container = document.getElementById('results-container');
+
+    if (!result) {
+      container.insertAdjacentHTML('beforeend', `
+        <div class="result-card">
+          <div class="result-header">
+            <span class="result-name">${name}</span>
+            <span class="badge badge-error">Evaluation Failed</span>
+          </div>
+        </div>`);
+      return;
+    }
+
+    const overall = result.overall_score || 0;
+    const scoreClass = overall >= 7 ? 'score-high' : overall >= 5 ? 'score-mid' : 'score-low';
+    const hire = (result.hire_decision || '').toUpperCase();
+    const hireClass = hire === 'YES' ? 'hire-yes' : hire === 'MAYBE' ? 'hire-maybe' : 'hire-no';
+    const s = result.scores || {};
+
+    const scoreItems = [
+      ['Problem Understanding', s.problem_understanding],
+      ['Solution Quality',      s.solution_quality],
+      ['AI Usage',              s.ai_usage],
+      ['System Design',        s.system_design],
+      ['Practicality',          s.practicality],
+      ['Clarity',               s.clarity],
+    ].map(([label, val]) => `
+      <div class="score-item">
+        <div class="label">${label}</div>
+        <div class="value">${val ?? '—'}<span style="font-size:0.65rem;color:#64748b"> /10</span></div>
+      </div>`).join('');
+
+    const strengths = (result.strengths || []).map(s => `<span class="tag tag-green">${s}</span>`).join('');
+    const weaknesses = (result.weaknesses || []).map(w => `<span class="tag tag-red">${w}</span>`).join('');
+    const suggestions = (result.improvement_suggestions || []).map(s => `<span class="tag tag-blue">${s}</span>`).join('');
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="result-card">
+        <div class="result-header">
+          <span class="result-name">${name}</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="score-pill ${scoreClass}">${overall} / 10</span>
+            <span class="hire-badge ${hireClass}">${hire}</span>
+          </div>
+        </div>
+
+        <div class="score-grid">${scoreItems}</div>
+
+        ${strengths ? `<p class="section-title">Strengths</p><div class="tag-list">${strengths}</div>` : ''}
+        ${weaknesses ? `<p class="section-title">Weaknesses</p><div class="tag-list">${weaknesses}</div>` : ''}
+        ${suggestions ? `<p class="section-title">Suggestions</p><div class="tag-list">${suggestions}</div>` : ''}
+        ${result.ai_feedback ? `<p class="section-title">AI Feedback</p><div class="reason-box">${result.ai_feedback}</div>` : ''}
+        ${result.reason ? `<p class="section-title">Hire Reason</p><div class="reason-box">${result.reason}</div>` : ''}
+      </div>`);
+  }
+
+  // --- Export CSV ---
+  function exportCSV() {
+    const headers = ['Name','Overall Score','Hire Decision','Problem Understanding','Solution Quality','AI Usage','System Design','Practicality','Clarity','Strengths','Weaknesses','Reason'];
+    const rows = results.map(({ student, result }) => {
+      const name = student['Student Name'] || student['Name'] || '';
+      if (!result) return [name, '', 'ERROR', '', '', '', '', '', '', '', '', ''];
+      const s = result.scores || {};
+      return [
+        name,
+        result.overall_score,
+        result.hire_decision,
+        s.problem_understanding, s.solution_quality, s.ai_usage,
+        s.system_design, s.practicality, s.clarity,
+        (result.strengths || []).join(' | '),
+        (result.weaknesses || []).join(' | '),
+        result.reason,
+      ];
+    });
+
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'evaluation_results.csv';
+    a.click();
+  }
+
+  function resetAll() {
+    parsedRows = [];
+    results = [];
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-info').textContent = '';
+    document.getElementById('preview-section').style.display = 'none';
+    document.getElementById('progress-section').style.display = 'none';
+    document.getElementById('results-section').style.display = 'none';
+  }
+</script>
+</body>
+</html>
