@@ -50,7 +50,6 @@
       color: #cbd5e1;
     }
 
-    /* Drop zone */
     .drop-zone {
       border: 2px dashed #475569;
       border-radius: 12px;
@@ -75,28 +74,11 @@
       height: 100%;
     }
 
-    .drop-zone .icon {
-      font-size: 2.5rem;
-      margin-bottom: 12px;
-    }
+    .drop-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .drop-zone p { color: #94a3b8; font-size: 0.9rem; }
+    .drop-zone p span { color: #818cf8; font-weight: 600; }
+    .file-info { margin-top: 12px; font-size: 0.85rem; color: #64748b; }
 
-    .drop-zone p {
-      color: #94a3b8;
-      font-size: 0.9rem;
-    }
-
-    .drop-zone p span {
-      color: #818cf8;
-      font-weight: 600;
-    }
-
-    .file-info {
-      margin-top: 12px;
-      font-size: 0.85rem;
-      color: #64748b;
-    }
-
-    /* Template download */
     .template-row {
       display: flex;
       align-items: center;
@@ -108,21 +90,10 @@
       border: 1px solid #334155;
     }
 
-    .template-row p {
-      font-size: 0.85rem;
-      color: #94a3b8;
-    }
-
-    .btn-link {
-      font-size: 0.85rem;
-      color: #38bdf8;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
+    .template-row p { font-size: 0.85rem; color: #94a3b8; }
+    .btn-link { font-size: 0.85rem; color: #38bdf8; text-decoration: none; font-weight: 500; }
     .btn-link:hover { text-decoration: underline; }
 
-    /* Preview table */
     #preview-section { display: none; }
 
     .table-wrap {
@@ -131,12 +102,7 @@
       border: 1px solid #334155;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     thead tr { background: #0f172a; }
 
     th {
@@ -172,7 +138,6 @@
     .badge-done    { background: #14532d; color: #4ade80; }
     .badge-error   { background: #450a0a; color: #f87171; }
 
-    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -188,30 +153,13 @@
 
     .btn:active { transform: scale(0.97); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #818cf8, #38bdf8);
-      color: #0f172a;
-    }
-
+    .btn-primary { background: linear-gradient(135deg, #818cf8, #38bdf8); color: #0f172a; }
     .btn-primary:hover:not(:disabled) { opacity: 0.88; }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid #475569;
-      color: #cbd5e1;
-    }
-
+    .btn-outline { background: transparent; border: 1px solid #475569; color: #cbd5e1; }
     .btn-outline:hover:not(:disabled) { border-color: #818cf8; color: #818cf8; }
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
+    .actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
 
-    /* Progress */
     #progress-section { display: none; }
 
     .progress-bar-wrap {
@@ -230,12 +178,8 @@
       width: 0%;
     }
 
-    .progress-label {
-      font-size: 0.82rem;
-      color: #64748b;
-    }
+    .progress-label { font-size: 0.82rem; color: #64748b; }
 
-    /* Results */
     #results-section { display: none; }
 
     .result-card {
@@ -255,30 +199,14 @@
       gap: 8px;
     }
 
-    .result-name {
-      font-weight: 700;
-      font-size: 1rem;
-      color: #f1f5f9;
-    }
+    .result-name { font-weight: 700; font-size: 1rem; color: #f1f5f9; }
 
-    .score-pill {
-      padding: 4px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-
+    .score-pill { padding: 4px 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; }
     .score-high  { background: #14532d; color: #4ade80; }
     .score-mid   { background: #713f12; color: #fbbf24; }
     .score-low   { background: #450a0a; color: #f87171; }
 
-    .hire-badge {
-      padding: 3px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
+    .hire-badge { padding: 3px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
     .hire-yes   { background: #14532d; color: #4ade80; }
     .hire-maybe { background: #713f12; color: #fbbf24; }
     .hire-no    { background: #450a0a; color: #f87171; }
@@ -290,46 +218,15 @@
       margin-bottom: 14px;
     }
 
-    .score-item {
-      background: #1e293b;
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
+    .score-item { background: #1e293b; border-radius: 8px; padding: 10px 12px; }
+    .score-item .label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .score-item .value { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
 
-    .score-item .label {
-      font-size: 0.72rem;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 4px;
-    }
+    .section-title { font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 6px; }
 
-    .score-item .value {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #e2e8f0;
-    }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
 
-    .section-title {
-      font-size: 0.78rem;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 12px 0 6px;
-    }
-
-    .tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .tag {
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-    }
-
+    .tag { padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; }
     .tag-green  { background: #14532d33; color: #4ade80; border: 1px solid #14532d; }
     .tag-red    { background: #450a0a33; color: #f87171; border: 1px solid #450a0a; }
     .tag-blue   { background: #1e3a5f33; color: #38bdf8; border: 1px solid #1e3a5f; }
@@ -342,18 +239,12 @@
       font-size: 0.83rem;
       color: #94a3b8;
       margin-top: 10px;
+      line-height: 1.6;
     }
 
-    /* Export */
     #export-section { display: none; margin-top: 8px; }
 
-    .alert {
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-    }
-
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; line-height: 1.5; }
     .alert-error { background: #450a0a33; border: 1px solid #7f1d1d; color: #fca5a5; }
     .alert-info  { background: #1e3a5f33; border: 1px solid #1e40af; color: #93c5fd; }
   </style>
@@ -393,18 +284,14 @@
   <!-- Preview Card -->
   <div class="card" id="preview-section">
     <h2>Preview — <span id="row-count">0</span> students found</h2>
-
     <div class="table-wrap">
       <table id="preview-table">
         <thead id="preview-head"></thead>
         <tbody id="preview-body"></tbody>
       </table>
     </div>
-
     <div class="actions">
-      <button class="btn btn-primary" id="evaluate-btn" onclick="startEvaluation()">
-        ⚡ Evaluate All
-      </button>
+      <button class="btn btn-primary" id="evaluate-btn" onclick="startEvaluation()">⚡ Evaluate All</button>
       <button class="btn btn-outline" onclick="resetAll()">Clear</button>
     </div>
   </div>
@@ -422,7 +309,6 @@
   <div class="card" id="results-section">
     <h2>Evaluation Results</h2>
     <div id="results-container"></div>
-
     <div id="export-section">
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-primary" onclick="exportCSV()">⬇ Export Results CSV</button>
@@ -436,7 +322,24 @@
   let parsedRows = [];
   let results = [];
 
-  // --- Drag & drop styling ---
+  // ─── Helper: get a value from a row by trying multiple possible key names ───
+  // Trims all keys before comparing so trailing spaces don't break matching.
+  function getField(row, ...candidates) {
+    // Build a trimmed-key lookup map once per call
+    const trimmedRow = {};
+    for (const k of Object.keys(row)) {
+      trimmedRow[k.trim()] = row[k];
+    }
+    for (const key of candidates) {
+      // Try exact match first
+      if (row[key] !== undefined && row[key] !== '') return row[key];
+      // Try trimmed match
+      if (trimmedRow[key.trim()] !== undefined && trimmedRow[key.trim()] !== '') return trimmedRow[key.trim()];
+    }
+    return '';
+  }
+
+  // ─── Drag & drop ───
   const dropZone = document.getElementById('drop-zone');
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -446,17 +349,15 @@
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
   });
-
   document.getElementById('file-input').addEventListener('change', e => {
     if (e.target.files[0]) handleFile(e.target.files[0]);
   });
 
-  // --- Parse Excel via backend ---
+  // ─── Parse Excel via backend ───
   function handleFile(file) {
     document.getElementById('file-info').textContent = `Selected: ${file.name}`;
     const formData = new FormData();
     formData.append('file', file);
-
     fetch('/parse-excel', { method: 'POST', body: formData })
       .then(r => r.json())
       .then(data => {
@@ -470,7 +371,6 @@
   function showPreview(columns, rows) {
     const head = document.getElementById('preview-head');
     const body = document.getElementById('preview-body');
-
     head.innerHTML = '<tr>' + columns.map(c => `<th>${c}</th>`).join('') + '<th>Status</th></tr>';
     body.innerHTML = rows.map((row, i) =>
       '<tr id="row-' + i + '">' +
@@ -478,16 +378,14 @@
       `<td><span class="badge badge-pending" id="status-${i}">Pending</span></td>` +
       '</tr>'
     ).join('');
-
     document.getElementById('row-count').textContent = rows.length;
     document.getElementById('preview-section').style.display = 'block';
     document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
   }
 
-  // --- Evaluate all rows sequentially ---
+  // ─── Evaluate all rows sequentially ───
   async function startEvaluation() {
     if (!parsedRows.length) return;
-
     results = [];
     document.getElementById('evaluate-btn').disabled = true;
     document.getElementById('progress-section').style.display = 'block';
@@ -500,7 +398,6 @@
       updateProgress(i, parsedRows.length);
       document.getElementById(`status-${i}`).textContent = 'Evaluating…';
       document.getElementById(`status-${i}`).className = 'badge badge-pending';
-
       try {
         const result = normalizeResult(await evaluateRow(parsedRows[i]));
         results.push({ student: parsedRows[i], result });
@@ -524,16 +421,62 @@
     document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
   }
 
+  // ─── THE KEY FIX: maps all possible column name variants ───
   function evaluateRow(row) {
     return new Promise((resolve, reject) => {
+
       const payload = {
-        problem_statement: row['Problem Statement'] || row['problem_statement'] || '',
-        use_cases:         row['Use Cases'] || row['use_cases'] || '',
-        system_design:     row['System Design'] || row['system_design'] || '',
-        github_url:        row['GitHub URL'] || row['github_url'] || '',
-        deployed_url:      row['Deployed URL'] || row['deployed_url'] || '',
-        video_url:         row['Video URL'] || row['video_url'] || '',
+        // Problem statement — Google Form long column name
+        problem_statement: getField(row,
+          'In your own words, describe the problem you are solving, the target users, their core pain points, and what success looks like?',
+          'Problem Statement',
+          'problem_statement'
+        ),
+
+        // Use cases — Google Form long column name
+        use_cases: getField(row,
+          'List the key use cases, edge cases, and constraints your solution handles. Describe the system inputs, enforced rules, and how failures are managed?',
+          'Use Cases',
+          'use_cases'
+        ),
+
+        // System design (Excel template only — not in Google Form)
+        system_design: getField(row,
+          'System Design',
+          'system_design'
+        ),
+
+        // GitHub URL — Google Form has trailing spaces in column name
+        github_url: getField(row,
+          'GitHub repository (ensure it is public and includes setup instructions in the README)',
+          'GitHub repository (ensure it is public and includes setup instructions in the README)  ',
+          'GitHub URL',
+          'github_url'
+        ),
+
+        // Deployed URL — Google Form has trailing spaces
+        deployed_url: getField(row,
+          'Deployed application URL (Vercel, Render, Railway, etc.)',
+          'Deployed application URL (Vercel, Render, Railway, etc.)  ',
+          'Deployed URL',
+          'deployed_url'
+        ),
+
+        // Video URL — Google Form has trailing spaces
+        video_url: getField(row,
+          'Screen recording or walkthrough video (YouTube, Loom, Drive, etc.) covering the technical approach, code walkthrough, and functionality explanation',
+          'Screen recording or walkthrough video (YouTube, Loom, Drive, etc.) covering the technical approach, code walkthrough, and functionality explanation  ',
+          'Video URL',
+          'video_url'
+        ),
+
+        // Pass student name & NIAT ID for context
+        'Student Name': getField(row, 'Name', 'Student Name'),
+        'NIAT ID':      getField(row, 'NIAT ID', 'NIATID', 'niat_id'),
       };
+
+      // Debug: log what we're sending (remove after confirming it works)
+      console.log('Evaluate payload:', payload);
 
       fetch('/evaluate', {
         method: 'POST',
@@ -558,7 +501,6 @@
               if (json.done) {
                 try {
                   let raw = json.full.trim();
-                  // Strip markdown code fences if present
                   raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
                   resolve(JSON.parse(raw));
                 } catch (e) {
@@ -581,7 +523,6 @@
     document.getElementById('progress-label').textContent = `${done} / ${total} complete`;
   }
 
-  // Normalize scores: if model returns 0-100 scale, convert to 0-10
   function normalizeScore(v) {
     const n = parseFloat(v);
     if (isNaN(n)) return null;
@@ -590,18 +531,20 @@
 
   function normalizeResult(result) {
     if (!result) return result;
-    result.overall_score = normalizeScore(result.overall_score);
-    if (result.scores) {
-      for (const key of Object.keys(result.scores)) {
-        result.scores[key] = normalizeScore(result.scores[key]);
+    // Handle both flat and nested structures
+    if (result.phase_2_evaluation) {
+      result.phase_2_evaluation.overall_score = normalizeScore(result.phase_2_evaluation.overall_score);
+      if (result.phase_2_evaluation.scores) {
+        for (const key of Object.keys(result.phase_2_evaluation.scores)) {
+          result.phase_2_evaluation.scores[key] = normalizeScore(result.phase_2_evaluation.scores[key]);
+        }
       }
     }
     return result;
   }
 
-  // --- Render error ---
   function renderError(student, errMsg, idx) {
-    const name = student['Student Name'] || student['Name'] || `Student ${idx + 1}`;
+    const name = getField(student, 'Name', 'Student Name') || `Student ${idx + 1}`;
     document.getElementById('results-container').insertAdjacentHTML('beforeend', `
       <div class="result-card">
         <div class="result-header">
@@ -612,9 +555,8 @@
       </div>`);
   }
 
-  // --- Render single result ---
   function renderResult(student, result, idx) {
-    const name = student['Student Name'] || student['Name'] || `Student ${idx + 1}`;
+    const name = getField(student, 'Name', 'Student Name') || `Student ${idx + 1}`;
     const container = document.getElementById('results-container');
 
     if (!result) {
@@ -628,17 +570,30 @@
       return;
     }
 
-    const overall = result.overall_score || 0;
-    const scoreClass = overall >= 7 ? 'score-high' : overall >= 5 ? 'score-mid' : 'score-low';
-    const hire = (result.hire_decision || '').toUpperCase();
-    const hireClass = hire === 'YES' ? 'hire-yes' : hire === 'MAYBE' ? 'hire-maybe' : 'hire-no';
-    const s = result.scores || {};
+    const classification = result.phase_1_classification || {};
+    const evaluation = result.phase_2_evaluation || {};
 
+    const overall = evaluation.overall_score ?? 0;
+    const scoreClass = overall >= 7 ? 'score-high' : overall >= 5 ? 'score-mid' : 'score-low';
+    const hire = (evaluation.hire_decision || '').toUpperCase();
+    const hireClass = hire === 'YES' ? 'hire-yes' : hire === 'MAYBE' ? 'hire-maybe' : 'hire-no';
+
+    const problemMatch = classification.problem_match;
+    const matchedNum = classification.matched_problem_number;
+    const classificationReasoning = classification.classification_reasoning || '';
+
+    const problemMatchBadge = problemMatch === false
+      ? `<span class="badge" style="background:#7f1d1d;color:#fca5a5;">❌ Not in Assignment List</span>`
+      : problemMatch === null
+        ? `<span class="badge" style="background:#334155;color:#94a3b8;">⚠ No Data</span>`
+        : `<span class="badge" style="background:#14532d;color:#4ade80;">✅ Problem #${matchedNum} Match</span>`;
+
+    const s = evaluation.scores || {};
     const scoreItems = [
       ['Problem Understanding', s.problem_understanding],
       ['Solution Quality',      s.solution_quality],
       ['AI Usage',              s.ai_usage],
-      ['System Design',        s.system_design],
+      ['System Design',         s.system_design],
       ['Practicality',          s.practicality],
       ['Clarity',               s.clarity],
     ].map(([label, val]) => `
@@ -647,49 +602,60 @@
         <div class="value">${val ?? '—'}<span style="font-size:0.65rem;color:#64748b"> /10</span></div>
       </div>`).join('');
 
-    const strengths = (result.strengths || []).map(s => `<span class="tag tag-green">${s}</span>`).join('');
-    const weaknesses = (result.weaknesses || []).map(w => `<span class="tag tag-red">${w}</span>`).join('');
-    const suggestions = (result.improvement_suggestions || []).map(s => `<span class="tag tag-blue">${s}</span>`).join('');
+    const strengths   = (evaluation.strengths || []).map(s => `<span class="tag tag-green">${s}</span>`).join('');
+    const weaknesses  = (evaluation.weaknesses || []).map(w => `<span class="tag tag-red">${w}</span>`).join('');
+    const suggestions = (evaluation.improvement_suggestions || []).map(s => `<span class="tag tag-blue">${s}</span>`).join('');
 
     container.insertAdjacentHTML('beforeend', `
       <div class="result-card">
         <div class="result-header">
           <span class="result-name">${name}</span>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <span class="score-pill ${scoreClass}">${overall} / 10</span>
             <span class="hire-badge ${hireClass}">${hire}</span>
+            ${problemMatchBadge}
           </div>
         </div>
 
+        ${classificationReasoning
+          ? `<div class="alert alert-info"><strong>Classification Analysis:</strong> ${classificationReasoning}</div>`
+          : ''}
+
         <div class="score-grid">${scoreItems}</div>
 
-        ${strengths ? `<p class="section-title">Strengths</p><div class="tag-list">${strengths}</div>` : ''}
-        ${weaknesses ? `<p class="section-title">Weaknesses</p><div class="tag-list">${weaknesses}</div>` : ''}
+        ${strengths   ? `<p class="section-title">Strengths</p><div class="tag-list">${strengths}</div>`     : ''}
+        ${weaknesses  ? `<p class="section-title">Weaknesses</p><div class="tag-list">${weaknesses}</div>`   : ''}
         ${suggestions ? `<p class="section-title">Suggestions</p><div class="tag-list">${suggestions}</div>` : ''}
-        ${result.ai_feedback ? `<p class="section-title">AI Feedback</p><div class="reason-box">${result.ai_feedback}</div>` : ''}
-        ${result.reason ? `<p class="section-title">Hire Reason</p><div class="reason-box">${result.reason}</div>` : ''}
+        ${evaluation.ai_feedback ? `<p class="section-title">AI Feedback</p><div class="reason-box">${evaluation.ai_feedback}</div>` : ''}
+        ${evaluation.reason      ? `<p class="section-title">Hire Reason</p><div class="reason-box">${evaluation.reason}</div>`      : ''}
       </div>`);
   }
 
-  // --- Export CSV ---
+  // ─── Export CSV ───
   function exportCSV() {
-    const headers = ['Name','Overall Score','Hire Decision','Problem Understanding','Solution Quality','AI Usage','System Design','Practicality','Clarity','Strengths','Weaknesses','Reason'];
+    const headers = ['Name','NIAT ID','Problem Match','Matched Problem #','Classification Analysis','Overall Score','Hire Decision','Problem Understanding','Solution Quality','AI Usage','System Design','Practicality','Clarity','Strengths','Weaknesses','AI Feedback','Reason'];
     const rows = results.map(({ student, result }) => {
-      const name = student['Student Name'] || student['Name'] || '';
-      if (!result) return [name, '', 'ERROR', '', '', '', '', '', '', '', '', ''];
-      const s = result.scores || {};
+      const name   = getField(student, 'Name', 'Student Name');
+      const niatId = getField(student, 'NIAT ID', 'NIATID', 'niat_id');
+      if (!result) return [name, niatId, '', '', '', 'ERROR', '', '', '', '', '', '', '', '', '', '', ''];
+      const classification = result.phase_1_classification || {};
+      const evaluation     = result.phase_2_evaluation || {};
+      const s = evaluation.scores || {};
       return [
-        name,
-        result.overall_score,
-        result.hire_decision,
+        name, niatId,
+        classification.problem_match ? 'Yes' : 'No',
+        classification.matched_problem_number || '',
+        classification.classification_reasoning || '',
+        evaluation.overall_score,
+        evaluation.hire_decision,
         s.problem_understanding, s.solution_quality, s.ai_usage,
         s.system_design, s.practicality, s.clarity,
-        (result.strengths || []).join(' | '),
-        (result.weaknesses || []).join(' | '),
-        result.reason,
+        (evaluation.strengths || []).join(' | '),
+        (evaluation.weaknesses || []).join(' | '),
+        evaluation.ai_feedback,
+        evaluation.reason,
       ];
     });
-
     const csv = [headers, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -708,7 +674,7 @@
     document.getElementById('results-section').style.display = 'none';
   }
 
-  // --- Google Sheets: Load ---
+  // ─── Google Sheets: Load ───
   function loadFromSheets() {
     const btn = document.getElementById('sheets-btn');
     const status = document.getElementById('sheets-status');
@@ -733,7 +699,7 @@
         parsedRows = data.rows;
         let message = `Loaded ${data.rows.length} row(s) from Google Sheets.`;
         if (data.skipped && data.skipped > 0) {
-          message += ` Skipped ${data.skipped} already evaluated student(s) (by NIAT ID).`;
+          message += ` Skipped ${data.skipped} already evaluated student(s).`;
         }
         status.textContent = message;
         status.style.color = '#4ade80';
@@ -746,7 +712,7 @@
       });
   }
 
-  // --- Google Sheets: Save results ---
+  // ─── Google Sheets: Save results ───
   function saveToSheets() {
     if (!results.length) return;
     const btn = document.getElementById('save-sheets-btn');

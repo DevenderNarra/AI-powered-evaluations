@@ -4,3 +4,4 @@ python-dotenv
 openpyxl
 pandas
 gspread[oauth]
+re
