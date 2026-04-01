@@ -3,3 +3,4 @@ openai
 python-dotenv
 openpyxl
 pandas
+gspread[oauth]

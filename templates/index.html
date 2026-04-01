@@ -376,6 +376,14 @@
 
     <p class="file-info" id="file-info"></p>
 
+    <div class="template-row" style="margin-top:16px;">
+      <p>Or load directly from Google Sheets</p>
+      <button class="btn btn-outline" id="sheets-btn" onclick="loadFromSheets()" style="font-size:0.85rem;padding:7px 16px;">
+        🔗 Load from Google Sheets
+      </button>
+    </div>
+    <p id="sheets-status" style="font-size:0.82rem;color:#64748b;margin-top:8px;"></p>
+
     <div class="template-row">
       <p>Need the correct column format?</p>
       <a href="/download-template" class="btn-link">Download Template ↓</a>
@@ -416,7 +424,11 @@
     <div id="results-container"></div>
 
     <div id="export-section">
-      <button class="btn btn-primary" onclick="exportCSV()">⬇ Export Results CSV</button>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-primary" onclick="exportCSV()">⬇ Export Results CSV</button>
+        <button class="btn btn-outline" id="save-sheets-btn" onclick="saveToSheets()">📤 Save to Google Sheets</button>
+      </div>
+      <p id="save-sheets-status" style="font-size:0.82rem;margin-top:10px;"></p>
     </div>
   </div>
 
@@ -694,6 +706,76 @@
     document.getElementById('preview-section').style.display = 'none';
     document.getElementById('progress-section').style.display = 'none';
     document.getElementById('results-section').style.display = 'none';
+  }
+
+  // --- Google Sheets: Load ---
+  function loadFromSheets() {
+    const btn = document.getElementById('sheets-btn');
+    const status = document.getElementById('sheets-status');
+    btn.disabled = true;
+    status.textContent = 'Loading from Google Sheets…';
+    status.style.color = '#94a3b8';
+
+    fetch('/load-sheets')
+      .then(r => r.json())
+      .then(data => {
+        btn.disabled = false;
+        if (data.error) {
+          status.textContent = 'Error: ' + data.error;
+          status.style.color = '#f87171';
+          return;
+        }
+        if (!data.rows || data.rows.length === 0) {
+          status.textContent = 'No data found in the input sheet.';
+          status.style.color = '#fbbf24';
+          return;
+        }
+        parsedRows = data.rows;
+        let message = `Loaded ${data.rows.length} row(s) from Google Sheets.`;
+        if (data.skipped && data.skipped > 0) {
+          message += ` Skipped ${data.skipped} already evaluated student(s) (by NIAT ID).`;
+        }
+        status.textContent = message;
+        status.style.color = '#4ade80';
+        showPreview(data.columns, data.rows);
+      })
+      .catch(err => {
+        btn.disabled = false;
+        status.textContent = 'Failed to connect: ' + err;
+        status.style.color = '#f87171';
+      });
+  }
+
+  // --- Google Sheets: Save results ---
+  function saveToSheets() {
+    if (!results.length) return;
+    const btn = document.getElementById('save-sheets-btn');
+    const status = document.getElementById('save-sheets-status');
+    btn.disabled = true;
+    status.textContent = 'Saving to Google Sheets…';
+    status.style.color = '#94a3b8';
+
+    fetch('/save-to-sheets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(results),
+    })
+      .then(r => r.json())
+      .then(data => {
+        btn.disabled = false;
+        if (data.error) {
+          status.textContent = 'Error: ' + data.error;
+          status.style.color = '#f87171';
+          return;
+        }
+        status.textContent = `Saved ${data.count} result(s) to Google Sheets successfully.`;
+        status.style.color = '#4ade80';
+      })
+      .catch(err => {
+        btn.disabled = false;
+        status.textContent = 'Failed to save: ' + err;
+        status.style.color = '#f87171';
+      });
   }
 </script>
 </body>
