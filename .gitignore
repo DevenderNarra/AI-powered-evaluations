@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 ele-env/
+credentials.json
+token.json
+*.json
