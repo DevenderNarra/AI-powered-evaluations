@@ -7,6 +7,7 @@ import gspread
 import re
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_file
 from dotenv import load_dotenv
+import requests
 load_dotenv()
 
 SPREADSHEET_ID = "1CFviUlaAhBqV_cE1SgnZsgOriLYbx4_s1G6MOjfrdaI"
@@ -183,20 +184,38 @@ Use Cases (Section 02):
 System Design (Section 03):
 {system_design}
 
+Remarks:
+{remarks}
+
 GitHub: {github_url}
 Deployed: {deployed_url}
 Video: {video_url}
 
+Pre-validated scores (use as starting points, adjust based on content): GitHub: {github_quality}, Deployment: {deployment_quality}, Video: {video_quality}
+
+Remarks may provide additional context or clarifications — consider them in your evaluation for completeness and insight.
+
 ---
 
-### Evaluation Criteria (Score 0–10 each):
+### Evaluation Criteria (Score 0–10 each — BE STRICT):
 
-1. Problem Understanding — Did they grasp the real-world pain point?
-2. Solution Quality — Is the solution well thought out and complete?
-3. AI Usage (MOST IMPORTANT) — Did they meaningfully use AI, not just wrap an API?
-4. System Design — Is the architecture logical and well-structured?
-5. Practicality & Scalability — Would this work in the real world?
-6. Clarity & Communication — Is the submission clear and well-explained?
+1. Problem Understanding — Did they grasp the real-world pain point? (Deduct if vague.)
+2. Solution Quality — Is the solution well thought out and complete? (Require specifics.)
+3. AI Usage (MOST IMPORTANT) — Did they meaningfully use AI, not just wrap an API? (Penalize generic use.)
+4. System Design — Is the architecture logical and well-structured? (Check for diagrams or details.)
+5. Practicality & Scalability — Would this work in the real world? (Deduct for unrealistic assumptions.)
+6. Clarity & Communication — Is the submission clear and well-explained? (Penalize poor writing.)
+
+### NEW: Additional Criteria (MANDATORY — Score 0 if missing/inadequate):
+
+7. GitHub Quality — Is the repo public, well-structured, with a README, setup instructions, and clean code? (0 if private, empty, or no README. Deduct for poor commits/PRs.)
+8. Deployment Quality — Is the app live, functional, and accessible? (0 if URL broken, not loading, or not matching description. Check for errors.)
+9. Video Quality — Does the video demonstrate functionality, code walkthrough, and explain the approach? Assess communication quality based on title, description, and content indicators. (0 if missing, private, or inaccessible. Deduct for lack of relevant keywords or short description.)
+
+### Scoring Rules:
+- Overall score = (avg of 1–6 * 0.6) + (avg of 7–9 * 0.4). Deduct 1 point per missing URL.
+- Hire Decision: YES only if overall ≥ 7.0 AND all 7–9 ≥ 6.0. NO if any 7–9 = 0.
+- Be critical: High scores only for exceptional, complete submissions. Deduct 2–3 points for gaps in any criterion.
 
 ---
 
@@ -216,7 +235,10 @@ Video: {video_url}
       "ai_usage": <0.0–10.0>,
       "system_design": <0.0–10.0>,
       "practicality": <0.0–10.0>,
-      "clarity": <0.0–10.0>
+      "clarity": <0.0–10.0>,
+      "github_quality": <0.0–10.0>,
+      "deployment_quality": <0.0–10.0>,
+      "video_quality": <0.0–10.0>
     }},
     "strengths": [
       "Specific, human observation about their submission",
@@ -255,6 +277,7 @@ EXPECTED_COLUMNS = [
     "Problem Statement",
     "Use Cases",
     "System Design",
+    "Remarks",
     "GitHub URL",
     "Deployed URL",
     "Video URL",
@@ -270,6 +293,119 @@ def extract_url(text, domain_hints):
             if hint in url:
                 return url
     return urls[0] if urls else None
+
+def validate_url(url, type_):
+    if not url or url == "Not provided":
+        return 0  # Missing
+    try:
+        if type_ == "github":
+            if "github.com" not in url:
+                return 0
+            # Extract owner/repo from URL
+            match = re.search(r'github\.com/([^/]+)/([^/]+)', url)
+            if not match:
+                return 0
+            owner, repo = match.groups()
+            # Try main branch first, then master
+            readme_urls = [
+                f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md",
+                f"https://raw.githubusercontent.com/{owner}/{repo}/master/README.md"
+            ]
+            readme_content = None
+            for readme_url in readme_urls:
+                response = requests.get(readme_url, timeout=10)
+                if response.status_code == 200:
+                    readme_content = response.text
+                    break
+            if not readme_content:
+                return 2  # Repo exists but no README
+            # Evaluate README quality
+            score = evaluate_readme(readme_content)
+            return score
+        elif type_ == "deployed":
+            response = requests.get(url, timeout=10)
+            return 10 if response.status_code == 200 else 0
+        elif type_ == "video":
+            # Basic check for YouTube or Drive
+            if "youtube.com" in url or "youtu.be" in url:
+                # Extract video ID
+                video_id = None
+                if "youtube.com/watch?v=" in url:
+                    video_id = url.split("v=")[1].split("&")[0]
+                elif "youtu.be/" in url:
+                    video_id = url.split("/")[-1]
+                if video_id:
+                    # Check if video is accessible (public)
+                    embed_url = f"https://www.youtube.com/embed/{video_id}"
+                    response = requests.head(embed_url, timeout=5)
+                    if response.status_code == 200:
+                        # Optionally, get title/description if API key available
+                        api_key = os.environ.get("YOUTUBE_API_KEY")
+                        if api_key:
+                            details = get_youtube_details(video_id, api_key)
+                            score = evaluate_video_details(details)
+                            return score
+                        else:
+                            return 8  # Accessible, assume good
+                    else:
+                        return 0  # Private or unavailable
+                return 0
+            elif "drive.google.com" in url:
+                response = requests.head(url, timeout=5)
+                return 10 if response.status_code == 200 else 0
+            return 0
+    except:
+        return 0
+    return 10  # Valid
+
+def evaluate_readme(content):
+    score = 0
+    content_lower = content.lower()
+    # Check for basic sections
+    sections = ["installation", "usage", "setup", "getting started", "features", "contributing", "license"]
+    found_sections = sum(1 for section in sections if section in content_lower)
+    score += min(found_sections * 2, 6)  # Up to 6 points for sections
+    # Check length (at least 200 chars for decent README)
+    if len(content) > 200:
+        score += 2
+    # Check for code blocks or links
+    if "```" in content or "[" in content:
+        score += 2
+    return min(score, 10)  # Cap at 10
+
+def get_youtube_details(video_id, api_key):
+    url = f"https://www.googleapis.com/youtube/v3/videos?id={video_id}&key={api_key}&part=snippet"
+    response = requests.get(url, timeout=10)
+    if response.status_code == 200:
+        data = response.json()
+        if data['items']:
+            snippet = data['items'][0]['snippet']
+            return {
+                'title': snippet.get('title', ''),
+                'description': snippet.get('description', ''),
+                'tags': snippet.get('tags', [])
+            }
+    return {}
+
+def evaluate_video_details(details):
+    score = 5  # Base for accessible video
+    if not details:
+        return score
+    title = details.get('title', '').lower()
+    description = details.get('description', '').lower()
+    # Check if title/description mentions assignment, demo, etc.
+    keywords = ['assignment', 'demo', 'walkthrough', 'explanation', 'project']
+    if any(k in title or k in description for k in keywords):
+        score += 2
+    # Check description length (indicates detail)
+    if len(description) > 100:
+        score += 2
+    # Check for tags related to tech
+    tags = details.get('tags', [])
+    tech_tags = ['python', 'javascript', 'ai', 'ml', 'web', 'app']
+    if any(t.lower() in tech_tags for t in tags):
+        score += 1
+    return min(score, 10)
 
 @app.route("/")
 def index():
@@ -347,13 +483,23 @@ def evaluate():
 
     system_design = data.get("system_design") or "Not provided"
 
+    remarks = data.get("remarks") or "Not provided"
+
+    github_score = validate_url(github_url, "github")
+    deployed_score = validate_url(deployed_url, "deployed")
+    video_score = validate_url(video_url, "video")
+
     prompt = EVALUATION_PROMPT.format(
         problem_statement=problem_statement,
         use_cases=use_cases,
         system_design=system_design,
+        remarks=remarks,
         github_url=github_url,
         deployed_url=deployed_url,
         video_url=video_url,
+        github_quality=github_score,
+        deployment_quality=deployed_score,
+        video_quality=video_score,
     )
 
     def generate():
@@ -479,6 +625,9 @@ def save_to_sheets():
                     r.get("System Design", ""),
                     r.get("Practicality", ""),
                     r.get("Clarity", ""),
+                    r.get("GitHub Quality", ""),
+                    r.get("Deployment Quality", ""),
+                    r.get("Video Quality", ""),
                     r.get("Strengths", ""),
                     r.get("Weaknesses", ""),
                     r.get("AI Feedback", ""),
@@ -496,6 +645,7 @@ def save_to_sheets():
             "Name","NIAT ID","Overall Score", "Hire Decision",
             "Problem Understanding", "Solution Quality", "AI Usage",
             "System Design", "Practicality", "Clarity",
+            "GitHub Quality", "Deployment Quality", "Video Quality",
             "Strengths", "Weaknesses", "AI Feedback", "Reason", "Problem Match", "Assignment List", "Matched Problem #", "Match Reasoning",
         ]
         rows = [headers] + existing_rows  # Start with headers and existing data
@@ -546,6 +696,9 @@ def save_to_sheets():
                     s.get("system_design", ""),
                     s.get("practicality", ""),
                     s.get("clarity", ""),
+                    s.get("github_quality", ""),
+                    s.get("deployment_quality", ""),
+                    s.get("video_quality", ""),
                     " | ".join(strengths),
                     " | ".join(weaknesses),
                     ai_feedback,
