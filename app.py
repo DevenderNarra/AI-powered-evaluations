@@ -167,7 +167,7 @@ PHASE 2: EVALUATION (HUMAN-LIKE, CONVERSATIONAL)
 ════════════════════════════════════════════════
 
 Evaluate ALL submissions — even out-of-scope ones.
-If problem_match = false → deduct 2–3 points from overall score and clearly state it's out of scope.
+If problem_match = false → score everything 0, hire_decision = NO, but provide ENCOURAGING feedback acknowledging their effort and inviting them to resubmit with one of the 7 approved problems.
 If problem_match = true → evaluate normally on all 6 criteria.
 If problem_match = null → score everything 0, hire_decision = NO, reason = "No submission data received."
 
@@ -191,8 +191,6 @@ GitHub: {github_url}
 Deployed: {deployed_url}
 Video: {video_url}
 
-Pre-validated scores (use as starting points, adjust based on content): GitHub: {github_quality}, Deployment: {deployment_quality}, Video: {video_quality}
-
 Remarks may provide additional context or clarifications — consider them in your evaluation for completeness and insight.
 
 ---
@@ -206,15 +204,9 @@ Remarks may provide additional context or clarifications — consider them in yo
 5. Practicality & Scalability — Would this work in the real world? (Deduct for unrealistic assumptions.)
 6. Clarity & Communication — Is the submission clear and well-explained? (Penalize poor writing.)
 
-### NEW: Additional Criteria (MANDATORY — Score 0 if missing/inadequate):
-
-7. GitHub Quality — Is the repo public, well-structured, with a README, setup instructions, and clean code? (0 if private, empty, or no README. Deduct for poor commits/PRs.)
-8. Deployment Quality — Is the app live, functional, and accessible? (0 if URL broken, not loading, or not matching description. Check for errors.)
-9. Video Quality — Does the video demonstrate functionality, code walkthrough, and explain the approach? Assess communication quality based on title, description, and content indicators. (0 if missing, private, or inaccessible. Deduct for lack of relevant keywords or short description.)
-
 ### Scoring Rules:
-- Overall score = (avg of 1–6 * 0.6) + (avg of 7–9 * 0.4). Deduct 1 point per missing URL.
-- Hire Decision: YES only if overall ≥ 7.0 AND all 7–9 ≥ 6.0. NO if any 7–9 = 0.
+- Overall score = avg of 1–6. Deduct 1 point per missing URL.
+- Hire Decision: YES only if overall ≥ 7.0. NO otherwise.
 - Be critical: High scores only for exceptional, complete submissions. Deduct 2–3 points for gaps in any criterion.
 
 ---
@@ -249,13 +241,13 @@ Remarks may provide additional context or clarifications — consider them in yo
       "Honest, specific gap referencing their actual submission",
       "Another concrete weakness"
     ],
-    "ai_feedback": "Conversational paragraph. Use 'I noticed', 'Your approach', 'This shows'. Be specific about HOW they used AI and what could be better.",
+    "ai_feedback": "Conversational paragraph. For IN-SCOPE: Use 'I noticed', 'Your approach', 'This shows'. Be specific about HOW they used AI and what could be better. For OUT-OF-SCOPE: Start positively! Acknowledge what you see (effort, technical approach, problem-solving thinking), then gently explain it's outside the 7 problems, and end with ENCOURAGEMENT to resubmit with one of the approved problems.",
     "improvement_suggestions": [
       "Concrete, actionable suggestion 1",
       "Concrete, actionable suggestion 2"
     ],
     "hire_decision": "YES / NO / MAYBE",
-    "reason": "If out-of-scope: acknowledge effort, clearly state it's not one of the 7, ask them to rebuild. If in-scope: reference their specific problem number and what worked or concerned you."
+    "reason": "If out-of-scope: acknowledge their effort positively, explain it doesn't match the 7 problems, and ENCOURAGE them to resubmit by choosing one of the 7 approved problems with high motivation. Example: 'Your idea shows thoughtfulness, but falls outside our 7 approved problems. We'd love to see your skills applied to one of these instead: [list relevant problems]. Resubmit and we'll evaluate it with full consideration!' If in-scope: reference their specific problem number and what worked or concerned you."
   }}
 }}
 
@@ -267,7 +259,9 @@ Remarks may provide additional context or clarifications — consider them in yo
 ✅ Reference specific things they wrote — not generic observations  
 ✅ "I noticed you used Gemini for X" not "AI was used effectively"
 ✅ Weaknesses should feel like coaching, not rejection
+✅ FOR OUT-OF-SCOPE SUBMISSIONS: Be encouraging! Acknowledge the effort, the problem-solving mindset, and the technical approach. Then friendly guide them to one of the 7 problems.
 ❌ Never write robotic filler like "The solution demonstrates architectural competence"
+❌ Never make out-of-scope submissions feel punished or devalued
 
 Now execute Phase 1 (look for a match first), then Phase 2 (human tone). Return ONLY the JSON.
 """
@@ -485,9 +479,9 @@ def evaluate():
 
     remarks = data.get("remarks") or "Not provided"
 
-    github_score = validate_url(github_url, "github")
-    deployed_score = validate_url(deployed_url, "deployed")
-    video_score = validate_url(video_url, "video")
+    github_score = ""
+    deployed_score = ""
+    video_score = ""
 
     prompt = EVALUATION_PROMPT.format(
         problem_statement=problem_statement,
@@ -497,9 +491,6 @@ def evaluate():
         github_url=github_url,
         deployed_url=deployed_url,
         video_url=video_url,
-        github_quality=github_score,
-        deployment_quality=deployed_score,
-        video_quality=video_score,
     )
 
     def generate():
@@ -617,8 +608,9 @@ def save_to_sheets():
                 existing_rows.append([
                     r.get("Name", ""),
                     r.get("NIAT ID", ""),
-                    r.get("Overall Score", ""),
-                    r.get("Hire Decision", ""),
+                    r.get("Problem Match", "N/A"),
+                    r.get("Matched Problem", ""),
+                    r.get("Problem Matching Reason", ""),
                     r.get("Problem Understanding", ""),
                     r.get("Solution Quality", ""),
                     r.get("AI Usage", ""),
@@ -628,25 +620,48 @@ def save_to_sheets():
                     r.get("GitHub Quality", ""),
                     r.get("Deployment Quality", ""),
                     r.get("Video Quality", ""),
+                    r.get("AI Overall Score", ""),
+                    r.get("AI Hire Decision", ""),
                     r.get("Strengths", ""),
                     r.get("Weaknesses", ""),
                     r.get("AI Feedback", ""),
-                    r.get("Reason", ""),
-                    r.get("Problem Match", "N/A"),
-                    r.get("Assignment List", "N/A"),
-                    r.get("Matched Problem #", ""),
-                    r.get("Match Reasoning", ""),
+                    r.get("Hire Reason", ""),
+                    r.get("Human overall score", ""),
+                    r.get("Final Decision", ""),
                 ])
         except Exception:
             existing_rows = []
             existing_ids = set()
 
         headers = [
-            "Name","NIAT ID","Overall Score", "Hire Decision",
-            "Problem Understanding", "Solution Quality", "AI Usage",
-            "System Design", "Practicality", "Clarity",
-            "GitHub Quality", "Deployment Quality", "Video Quality",
-            "Strengths", "Weaknesses", "AI Feedback", "Reason", "Problem Match", "Assignment List", "Matched Problem #", "Match Reasoning",
+            # Student Identification
+            "Name",
+            "NIAT ID",
+            # Problem Classification (first validation)
+            "Problem Match",
+            "Matched Problem",
+            "Problem Matching Reason",
+            # Detailed AI Evaluation Scores
+            "Problem Understanding",
+            "Solution Quality",
+            "AI Usage",
+            "System Design",
+            "Practicality",
+            "Clarity",
+            "GitHub Quality",
+            "Deployment Quality",
+            "Video Quality",
+            # AI Overall Decision
+            "AI Overall Score",
+            "AI Hire Decision",
+            # AI's Detailed Feedback
+            "Strengths",
+            "Weaknesses",
+            "AI Feedback",
+            "Hire Reason",
+            # Human Review (Final Decision)
+            "Human overall score",
+            "Final Decision",
         ]
         rows = [headers] + existing_rows  # Start with headers and existing data
         added = 0
@@ -688,8 +703,9 @@ def save_to_sheets():
                 rows.append([
                     name,
                     niat_id,
-                    overall_score,
-                    hire_decision,
+                    problem_match_text,
+                    str(matched_problem_number) if matched_problem_number else "",
+                    classification_reasoning,
                     s.get("problem_understanding", ""),
                     s.get("solution_quality", ""),
                     s.get("ai_usage", ""),
@@ -699,14 +715,14 @@ def save_to_sheets():
                     s.get("github_quality", ""),
                     s.get("deployment_quality", ""),
                     s.get("video_quality", ""),
+                    overall_score,
+                    hire_decision,
                     " | ".join(strengths),
                     " | ".join(weaknesses),
                     ai_feedback,
                     reason,
-                    problem_match_text,
-                    problem_match_text,
-                    str(matched_problem_number) if matched_problem_number else "",
-                    classification_reasoning,
+                    "",
+                    hire_decision,
                 ])
 
             if nid_norm:
