@@ -28,9 +28,29 @@ def get_gspread_client():
 app = Flask(__name__)
 
 EVALUATION_PROMPT = """
-You are a strict Assignment Classifier and Evaluator acting as a real human hiring manager.
+You are a STRICT Assignment Classifier and Evaluator acting as a senior technical hiring manager.
 
 Your response MUST follow TWO phases in order. Do NOT skip or merge them.
+
+════════════════════════════════════════════════
+MANDATORY 5-SECTION SUBMISSION STRUCTURE
+════════════════════════════════════════════════
+
+Every assignment MUST include ALL 5 sections:
+1. Your Understanding of the Assignment (Problem Statement) — Demonstrate problem understanding
+2. Cases & Logic Constraints (Use Cases) — Map important cases and constraints
+3. Technical Approach & Architecture (System Design) — Describe the design and AI usage
+4. Code Submission (GitHub) — Working code with complete README
+5. Working Demonstration — Deployed URL OR video showing the AI/automation in action
+
+If ANY of the 5 sections are missing or insufficient:
+- GitHub missing or private → DEDUCT 2 points from overall score + NOTE IT
+- Deployed URL missing → DEDUCT 2.5 points from overall score + NOTE IT
+- Video URL missing (and no deployed URL) → DEDUCT 2.5 points from overall score + NOTE IT
+- README incomplete/missing → DEDUCT 1 point from overall score + NOTE IT
+- System Design missing/vague → DEDUCT 1.5 points from overall score + NOTE IT
+
+The evaluation is ONLY valid if the student followed the 5-section structure. Missing sections = significant penalties.
 
 ════════════════════════════════════════════════
 PHASE 1: CLASSIFICATION
@@ -43,7 +63,7 @@ When in doubt → MATCH. A false negative (rejecting valid work) is worse than a
 
 ### ⚠️ BEFORE YOU CLASSIFY — CHECK IF DATA EXISTS
 
-Look at the student submission below (Problem Statement + Use Cases).
+Look at the student submission below (Section 01 Problem Statement + Section 02 Use Cases).
 
 IF both are "Not provided" or completely empty:
 - Set problem_match = null (not true, not false)
@@ -195,19 +215,36 @@ Remarks may provide additional context or clarifications — consider them in yo
 
 ---
 
-### Evaluation Criteria (Score 0–10 each — BE STRICT):
+---
 
-1. Problem Understanding — Did they grasp the real-world pain point? (Deduct if vague.)
-2. Solution Quality — Is the solution well thought out and complete? (Require specifics.)
-3. AI Usage (MOST IMPORTANT) — Did they meaningfully use AI, not just wrap an API? (Penalize generic use.)
-4. System Design — Is the architecture logical and well-structured? (Check for diagrams or details.)
-5. Practicality & Scalability — Would this work in the real world? (Deduct for unrealistic assumptions.)
-6. Clarity & Communication — Is the submission clear and well-explained? (Penalize poor writing.)
+### Evaluation Criteria (Score 0–10 each — BE VERY STRICT):
 
-### Scoring Rules:
-- Overall score = avg of 1–6. Deduct 1 point per missing URL.
-- Hire Decision: YES only if overall ≥ 7.0. NO otherwise.
-- Be critical: High scores only for exceptional, complete submissions. Deduct 2–3 points for gaps in any criterion.
+1. **Section 01 - Problem Understanding** — Did they clearly describe the problem, pain points, and success criteria? (0–10)
+2. **Section 02 - Cases & Logic Constraints** — Did they map important cases, edge cases, and constraints? (0–10)
+3. **Section 03 - AI/ML Usage (MOST IMPORTANT)** — Did they meaningfully use AI, showing HOW and WHY they chose specific models? (0–10)
+4. **Section 03 - Technical Architecture** — Is the design logical, well-explained, with data flow clarity? (0–10)
+5. **Practicality & Scalability** — Would this work in the real world with the AI approach chosen? (0–10)
+6. **Clarity & Communication** — Are sections 1–5 clear, well-organized, and easy to follow? (0–10)
+
+### DELIVERABLE VERIFICATION (MANDATORY):
+Check these BEFORE calculating overall score:
+- **GitHub Quality** — Repo exists, is PUBLIC, has complete README with setup instructions (0–10)
+  - Missing GitHub or private → score = 0, DEDUCT 2 from final overall
+  - README missing/incomplete → DEDUCT 1 from final overall
+- **Deployment Quality** — Live demo accessible showing AI/automation in action (0–10)
+  - Missing deployed URL → DEDUCT 2.5 from final overall
+  - If deployed exists but broken → score = 0
+- **Video Quality** — Screen recording showing code walkthrough and AI in action (0–10)
+  - Missing video (and no deployed demo) → DEDUCT 2.5 from final overall
+  - If video exists but doesn't show AI/automation → score = 2
+
+### Scoring Rules — STRICT INTERPRETATION:
+- Base Overall Score = (avg of criteria 1–6). 
+- THEN apply deliverable deductions (GitHub, Deployment, Video penalties above).
+- Final Overall Score = Base Score - Total Deductions (cannot go below 0).
+- Hire Decision: YES only if Final Overall Score ≥ 7.0 AND all three deliverables (GitHub, Deployed, Video) are present AND GitHub ≥ 6.
+- If ANY critical deliverable is missing → Hire Decision = NO (or MAYBE at best).
+- Example: Student scores 8.5 on criteria but missing video → 8.5 - 2.5 = 6.0 → NO (below 7.0 threshold).
 
 ---
 
@@ -223,15 +260,16 @@ Remarks may provide additional context or clarifications — consider them in yo
     "overall_score": <0.0–10.0>,
     "scores": {{
       "problem_understanding": <0.0–10.0>,
-      "solution_quality": <0.0–10.0>,
+      "cases_constraints": <0.0–10.0>,
       "ai_usage": <0.0–10.0>,
-      "system_design": <0.0–10.0>,
+      "technical_architecture": <0.0–10.0>,
       "practicality": <0.0–10.0>,
       "clarity": <0.0–10.0>,
       "github_quality": <0.0–10.0>,
       "deployment_quality": <0.0–10.0>,
       "video_quality": <0.0–10.0>
     }},
+    "deliverable_penalties": "Explicitly state each deduction: 'GitHub missing: -2 pts', 'Video missing: -2.5 pts', etc. Total deductions applied.",
     "strengths": [
       "Specific, human observation about their submission",
       "Another genuine strength with reference to their work",
@@ -239,15 +277,16 @@ Remarks may provide additional context or clarifications — consider them in yo
     ],
     "weaknesses": [
       "Honest, specific gap referencing their actual submission",
-      "Another concrete weakness"
+      "Another concrete weakness",
+      "Missing/incomplete section: [specify which section and why it matters]"
     ],
-    "ai_feedback": "Conversational paragraph. For IN-SCOPE: Use 'I noticed', 'Your approach', 'This shows'. Be specific about HOW they used AI and what could be better. For OUT-OF-SCOPE: Start positively! Acknowledge what you see (effort, technical approach, problem-solving thinking), then gently explain it's outside the 7 problems, and end with ENCOURAGEMENT to resubmit with one of the approved problems.",
+    "ai_feedback": "Conversational paragraph. For IN-SCOPE COMPLETE: 'I noticed you used [specific AI/model]. Your approach to [specific aspect] shows [observation].' For INCOMPLETE: 'You submitted [sections 1-3], but [missing sections]. This makes it hard to fully evaluate your work. To be considered, please add [specific missing section].' For OUT-OF-SCOPE: Acknowledge effort, explain it's outside the 7 problems, encourage resubmission with one of the 7.",
     "improvement_suggestions": [
-      "Concrete, actionable suggestion 1",
+      "Concrete, actionable suggestion 1 (e.g., 'Add a video showing the AI in action')",
       "Concrete, actionable suggestion 2"
     ],
     "hire_decision": "YES / NO / MAYBE",
-    "reason": "If out-of-scope: acknowledge their effort positively, explain it doesn't match the 7 problems, and ENCOURAGE them to resubmit by choosing one of the 7 approved problems with high motivation. Example: 'Your idea shows thoughtfulness, but falls outside our 7 approved problems. We'd love to see your skills applied to one of these instead: [list relevant problems]. Resubmit and we'll evaluate it with full consideration!' If in-scope: reference their specific problem number and what worked or concerned you."
+    "reason": "Include ALL reasons: (1) Problem match/scope, (2) Quality of sections submitted, (3) Status of all 5 deliverables, (4) Missing penalties applied. Example: 'YES: Problem #3 match, strong section 1-3, GitHub complete with good README, deployed demo works, video shows AI logic. NO: Scores well (8.2) but missing deployed URL and video (-5 pts total) → final 3.2, below threshold. Resubmit with working demo and walkthrough video. MAYBE: Waiting for clarification on [section].' Be specific about missing components and next steps."
   }}
 }}
 
@@ -257,11 +296,12 @@ Remarks may provide additional context or clarifications — consider them in yo
 
 ✅ Write like a human who actually read their submission
 ✅ Reference specific things they wrote — not generic observations  
-✅ "I noticed you used Gemini for X" not "AI was used effectively"
+✅ "I noticed you used Claude to classify X" not "AI was used effectively"
 ✅ Weaknesses should feel like coaching, not rejection
 ✅ FOR OUT-OF-SCOPE SUBMISSIONS: Be encouraging! Acknowledge the effort, the problem-solving mindset, and the technical approach. Then friendly guide them to one of the 7 problems.
+✅ FOR INCOMPLETE SUBMISSIONS: Be CLEAR about what's missing and why it matters. Offer a straightforward path to improvement.
 ❌ Never write robotic filler like "The solution demonstrates architectural competence"
-❌ Never make out-of-scope submissions feel punished or devalued
+❌ Never make submissions feel punished unfairly — deductions are fair and explained
 
 Now execute Phase 1 (look for a match first), then Phase 2 (human tone). Return ONLY the JSON.
 """
@@ -612,14 +652,15 @@ def save_to_sheets():
                     r.get("Matched Problem", ""),
                     r.get("Problem Matching Reason", ""),
                     r.get("Problem Understanding", ""),
-                    r.get("Solution Quality", ""),
+                    r.get("Cases & Constraints", ""),
                     r.get("AI Usage", ""),
-                    r.get("System Design", ""),
+                    r.get("Technical Architecture", ""),
                     r.get("Practicality", ""),
                     r.get("Clarity", ""),
                     r.get("GitHub Quality", ""),
                     r.get("Deployment Quality", ""),
                     r.get("Video Quality", ""),
+                    r.get("Deliverable Penalties", ""),
                     r.get("AI Overall Score", ""),
                     r.get("AI Hire Decision", ""),
                     r.get("Strengths", ""),
@@ -643,14 +684,15 @@ def save_to_sheets():
             "Problem Matching Reason",
             # Detailed AI Evaluation Scores
             "Problem Understanding",
-            "Solution Quality",
+            "Cases & Constraints",
             "AI Usage",
-            "System Design",
+            "Technical Architecture",
             "Practicality",
             "Clarity",
             "GitHub Quality",
             "Deployment Quality",
             "Video Quality",
+            "Deliverable Penalties",
             # AI Overall Decision
             "AI Overall Score",
             "AI Hire Decision",
@@ -696,6 +738,7 @@ def save_to_sheets():
                 weaknesses = evaluation.get("weaknesses", [])
                 ai_feedback = evaluation.get("ai_feedback", "")
                 reason = evaluation.get("reason", "")
+                deliverable_penalties = evaluation.get("deliverable_penalties", "")
                 
                 # Format for Sheets
                 problem_match_text = "Yes" if problem_match else "No"
@@ -707,14 +750,15 @@ def save_to_sheets():
                     str(matched_problem_number) if matched_problem_number else "",
                     classification_reasoning,
                     s.get("problem_understanding", ""),
-                    s.get("solution_quality", ""),
+                    s.get("cases_constraints", ""),
                     s.get("ai_usage", ""),
-                    s.get("system_design", ""),
+                    s.get("technical_architecture", ""),
                     s.get("practicality", ""),
                     s.get("clarity", ""),
                     s.get("github_quality", ""),
                     s.get("deployment_quality", ""),
                     s.get("video_quality", ""),
+                    deliverable_penalties,
                     overall_score,
                     hire_decision,
                     " | ".join(strengths),
